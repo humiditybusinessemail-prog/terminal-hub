@@ -1,24 +1,23 @@
-# AppleTerminalUI Revised
+# AppleTerminalUI
 
-This version revises the main source so the library keeps a much stronger Apple Terminal identity while improving the internal page structure.
+AppleTerminalUI is a LuaU client-side UI library for Roblox with a strong macOS Terminal look.
 
-## What changed
+## Included
 
-- stronger macOS Terminal look
-- dedicated sidebar home card
-- clear tabs section in the sidebar
-- per-page hero/header block
-- cleaner page routing with independent scrolling pages
-- improved section containers and control layout
-- same reusable client-side executor workflow
-- config save/load, notifications, keybinds, sliders, dropdowns, textboxes, and toggles
-
-The visual identity, component design, API shape, and terminal styling are rebuilt around the Apple Terminal concept.
-
-## Files
-
-- `src/AppleTerminalUI.lua`
-- `examples/Example.client.lua`
+- draggable window
+- macOS traffic-light controls
+- sidebar home card
+- sidebar tabs list
+- hero header per page
+- sections
+- buttons
+- toggles
+- textboxes
+- sliders
+- dropdowns
+- keybinds
+- notifications
+- config save and load
 
 ## Load the library
 
@@ -26,39 +25,57 @@ The visual identity, component design, API shape, and terminal styling are rebui
 local AppleTerminalUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/humiditybusinessemail-prog/terminal-hub/main/src/AppleTerminalUI.lua"))()
 ```
 
-## Basic usage
+## Create a window
 
 ```lua
 local Window = AppleTerminalUI:CreateWindow({
     Title = "Terminal Hub",
-    Subtitle = "apple terminal identity",
-    Size = UDim2.fromOffset(900, 580),
+    Subtitle = "Control panel",
+    Size = UDim2.fromOffset(920, 590),
     ConfigFolder = "AppleTerminalUI"
 })
+```
 
-local Tab = Window:CreateTab("Home", {
-    Icon = "~/",
-    Description = "overview page"
+## Create a tab
+
+```lua
+local Tab = Window:CreateTab("Configuration", {
+    Icon = "cfg",
+    Description = "Controls"
 })
+```
 
+## Set the page header
+
+```lua
 Tab:SetHero({
-    Command = "$ ./terminal_hub",
-    Title = "Terminal Hub",
-    Description = "Page hero/header block"
+    Command = "$ open configuration",
+    Title = "Configuration",
+    Description = "Adjust the profile, speed, mode, and save your current setup.",
+    MetaLeft = "profile: default",
+    MetaRight = "editable"
 })
+```
 
-local Section = Tab:AddSection("Quick Start")
+## Create a section
 
+```lua
+local Section = Tab:AddSection("Profile")
+```
+
+## Add controls
+
+```lua
 Section:AddButton({
-    Title = "Run Command",
+    Title = "Save Config",
     Callback = function()
-        print("clicked")
+        print("saved")
     end
 })
 
 Section:AddToggle({
-    Title = "Enable Feature",
-    Flag = "enabled",
+    Title = "UI Enabled",
+    Flag = "ui_enabled",
     Default = true,
     Callback = function(state)
         print(state)
@@ -66,29 +83,32 @@ Section:AddToggle({
 })
 
 Section:AddTextbox({
-    Title = "Username",
-    Flag = "username",
-    Default = "guest"
+    Title = "Profile Name",
+    Flag = "profile_name",
+    Default = "default",
+    Placeholder = "Enter a profile name..."
 })
 
 Section:AddSlider({
     Title = "WalkSpeed",
-    Flag = "walkspeed",
+    Flag = "walk_speed",
     Min = 0,
     Max = 100,
     Increment = 1,
-    Default = 16
+    Default = 16,
+    Suffix = " ws"
 })
 
 Section:AddDropdown({
     Title = "Mode",
     Flag = "mode",
-    Options = {"Legit", "Stealth", "Debug"}
+    Default = "Legit",
+    Options = {"Legit", "Stealth", "Debug", "Custom"}
 })
 
 Section:AddKeybind({
-    Title = "Toggle UI",
-    Flag = "toggle_ui",
+    Title = "Hide / Show Window",
+    Flag = "toggle_window_key",
     Default = Enum.KeyCode.RightShift,
     Callback = function()
         Window:ToggleVisible()
@@ -96,37 +116,23 @@ Section:AddKeybind({
 })
 ```
 
-## Window API
+## Window methods
 
 ```lua
 Window:SetVisible(true)
 Window:ToggleVisible()
 Window:Destroy()
-Window:GetFlag("enabled")
-Window:SetFlag("enabled", false)
+Window:Notify("Saved", "Your config was written.", 3)
+Window:GetFlag("walk_speed")
+Window:SetFlag("walk_speed", 24)
 Window:GetConfig()
 Window:SaveConfig("my_config")
 Window:LoadConfig("my_config")
-Window:Notify("Saved", "Config saved.", 3)
-```
-
-## Tab API
-
-```lua
-local Tab = Window:CreateTab("Combat", {
-    Icon = ">_",
-    Description = "combat related features"
-})
-
-Tab:SetHero({
-    Command = "$ open combat",
-    Title = "Combat",
-    Description = "Hero card text"
-})
 ```
 
 ## Notes
 
-- `game:HttpGet(...)` should use the raw GitHub URL, not the `/blob/` page URL.
-- Config files are saved with executor file APIs when available.
-- If file APIs do not exist, configs fall back to in-memory session storage.
+- Use the raw GitHub URL with `game:HttpGet(...)`.
+- Config files use executor file APIs when they are available.
+- If file APIs are unavailable, configs stay in memory for the current session.
+- A full working example is in `examples/Example.client.lua`.

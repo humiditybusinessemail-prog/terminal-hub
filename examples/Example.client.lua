@@ -2,106 +2,124 @@ local AppleTerminalUI = loadstring(game:HttpGet("https://raw.githubusercontent.c
 
 local Window = AppleTerminalUI:CreateWindow({
     Title = "Terminal Hub",
-    Subtitle = "session",
-    Size = UDim2.fromOffset(900, 580),
+    Subtitle = "Control panel",
+    Size = UDim2.fromOffset(920, 590),
     ConfigFolder = "AppleTerminalUI"
 })
 
 local Home = Window:CreateTab("Home", {
     Icon = "~/",
-    Description = "dashboard"
+    Description = "Overview"
 })
 
 Home:SetHero({
     Command = "$ ./terminal_hub",
     Title = "Terminal Hub",
-    Description = "dashboard",
+    Description = "Welcome back. Pick a section on the left and adjust your settings from here.",
     MetaLeft = "shell: zsh",
-    MetaRight = "ready"
+    MetaRight = "connected"
 })
 
-local Main = Home:AddSection("Main")
-Main:AddButton({
-    Title = "Hello",
+local Welcome = Home:AddSection("Quick Actions")
+Welcome:AddParagraph("Welcome", "This layout keeps the sidebar visible, the page header readable, and each section easy to scan.")
+Welcome:AddButton({
+    Title = "Say Hello",
     Callback = function()
-        print("Terminal Hub")
-        Window:Notify("Terminal Hub", "Ready", 2)
+        print("Terminal Hub is ready")
+        Window:Notify("Terminal Hub", "Everything is loaded.", 2)
     end
 })
-Main:AddToggle({
-    Title = "Enabled",
-    Flag = "enabled",
+Welcome:AddToggle({
+    Title = "UI Enabled",
+    Flag = "ui_enabled",
     Default = true,
-    Callback = function(v)
-        print("Enabled:", v)
+    Callback = function(state)
+        print("UI Enabled:", state)
     end
 })
-Main:AddKeybind({
-    Title = "Toggle UI",
-    Flag = "toggle_ui",
+Welcome:AddKeybind({
+    Title = "Hide / Show Window",
+    Flag = "toggle_window_key",
     Default = Enum.KeyCode.RightShift,
     Callback = function()
         Window:ToggleVisible()
     end
 })
 
-local Settings = Window:CreateTab("Settings", {
+local Settings = Window:CreateTab("Configuration", {
     Icon = "cfg",
-    Description = "config"
+    Description = "Controls"
 })
 
 Settings:SetHero({
-    Command = "$ open settings",
-    Title = "Settings",
-    Description = "config",
+    Command = "$ open configuration",
+    Title = "Configuration",
+    Description = "Adjust the profile, speed, mode, and save your current setup.",
     MetaLeft = "profile: default",
-    MetaRight = "client"
+    MetaRight = "editable"
 })
 
-local Config = Settings:AddSection("Config")
-Config:AddTextbox({
-    Title = "Profile",
+local Profile = Settings:AddSection("Profile")
+Profile:AddTextbox({
+    Title = "Profile Name",
     Flag = "profile_name",
     Default = "default",
-    Placeholder = "profile"
+    Placeholder = "Enter a profile name...",
+    Callback = function(text)
+        print("Profile Name:", text)
+    end
 })
-Config:AddSlider({
+Profile:AddDropdown({
+    Title = "Mode",
+    Flag = "mode",
+    Default = "Legit",
+    Options = {"Legit", "Stealth", "Debug", "Custom"},
+    Callback = function(choice)
+        print("Mode:", choice)
+    end
+})
+Profile:AddSlider({
     Title = "WalkSpeed",
-    Flag = "walkspeed",
+    Flag = "walk_speed",
     Min = 0,
     Max = 100,
     Increment = 1,
     Default = 16,
-    Suffix = " ws"
-})
-Config:AddDropdown({
-    Title = "Mode",
-    Flag = "mode",
-    Default = "Legit",
-    Options = {"Legit", "Stealth", "Debug", "Custom"}
+    Suffix = " ws",
+    Callback = function(value)
+        print("WalkSpeed:", value)
+    end
 })
 
-local IO = Settings:AddSection("IO")
-IO:AddButton({
-    Title = "Save",
+local Storage = Settings:AddSection("Storage")
+Storage:AddButton({
+    Title = "Save Config",
     Callback = function()
         local ok, result = Window:SaveConfig("terminal_hub_example")
-        Window:Notify(ok and "Saved" or "Error", ok and "Done" or tostring(result), 3)
+        if ok then
+            Window:Notify("Saved", tostring(result), 3)
+        else
+            Window:Notify("Error", tostring(result), 3)
+        end
     end
 })
-IO:AddButton({
-    Title = "Load",
+Storage:AddButton({
+    Title = "Load Config",
     Callback = function()
         local ok, result = Window:LoadConfig("terminal_hub_example")
-        Window:Notify(ok and "Loaded" or "Error", ok and "Done" or tostring(result), 3)
+        if ok then
+            Window:Notify("Loaded", "Your saved values were restored.", 3)
+        else
+            Window:Notify("Error", tostring(result), 3)
+        end
     end
 })
-IO:AddButton({
-    Title = "Print",
+Storage:AddButton({
+    Title = "Print Flags",
     Callback = function()
-        local cfg = Window:GetConfig()
-        for k, v in pairs(cfg) do
-            print(k, v)
+        for flag, value in pairs(Window:GetConfig()) do
+            print(flag, value)
         end
+        Window:Notify("Flags", "Current values were printed to the console.", 2)
     end
 })

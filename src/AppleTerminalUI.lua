@@ -13,11 +13,13 @@ Library._memoryConfigs = {}
 Library.Theme = {
     Window = Color3.fromRGB(16, 17, 20),
     WindowEdge = Color3.fromRGB(33, 35, 40),
+    TopBar = Color3.fromRGB(25, 27, 31),
     Sidebar = Color3.fromRGB(20, 22, 26),
     SidebarCard = Color3.fromRGB(24, 26, 31),
     Panel = Color3.fromRGB(22, 24, 29),
     PanelSoft = Color3.fromRGB(27, 30, 36),
     PanelMuted = Color3.fromRGB(18, 20, 24),
+    Input = Color3.fromRGB(14, 16, 19),
     Stroke = Color3.fromRGB(56, 60, 68),
     StrokeSoft = Color3.fromRGB(41, 44, 51),
     Text = Color3.fromRGB(232, 235, 239),
@@ -39,74 +41,74 @@ Tab.__index = Tab
 local Section = {}
 Section.__index = Section
 
-local function new(className, props)
+local function new(className, properties)
     local object = Instance.new(className)
-    for key, value in pairs(props or {}) do
+    for key, value in pairs(properties or {}) do
         object[key] = value
     end
     return object
 end
 
 local function addCorner(instance, radius)
-    local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, radius or 8)
-    c.Parent = instance
-    return c
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, radius or 8)
+    corner.Parent = instance
+    return corner
 end
 
 local function addStroke(instance, color, thickness, transparency)
-    local s = Instance.new("UIStroke")
-    s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    s.Color = color
-    s.Thickness = thickness or 1
-    s.Transparency = transparency or 0
-    s.Parent = instance
-    return s
+    local stroke = Instance.new("UIStroke")
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.Color = color
+    stroke.Thickness = thickness or 1
+    stroke.Transparency = transparency or 0
+    stroke.Parent = instance
+    return stroke
 end
 
 local function addPadding(instance, left, right, top, bottom)
-    local p = Instance.new("UIPadding")
-    p.PaddingLeft = UDim.new(0, left or 0)
-    p.PaddingRight = UDim.new(0, right or 0)
-    p.PaddingTop = UDim.new(0, top or 0)
-    p.PaddingBottom = UDim.new(0, bottom or 0)
-    p.Parent = instance
-    return p
+    local padding = Instance.new("UIPadding")
+    padding.PaddingLeft = UDim.new(0, left or 0)
+    padding.PaddingRight = UDim.new(0, right or 0)
+    padding.PaddingTop = UDim.new(0, top or 0)
+    padding.PaddingBottom = UDim.new(0, bottom or 0)
+    padding.Parent = instance
+    return padding
 end
 
 local function addList(instance, padding)
-    local l = Instance.new("UIListLayout")
-    l.Padding = UDim.new(0, padding or 0)
-    l.SortOrder = Enum.SortOrder.LayoutOrder
-    l.HorizontalAlignment = Enum.HorizontalAlignment.Left
-    l.VerticalAlignment = Enum.VerticalAlignment.Top
-    l.Parent = instance
-    return l
+    local layout = Instance.new("UIListLayout")
+    layout.Padding = UDim.new(0, padding or 0)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+    layout.VerticalAlignment = Enum.VerticalAlignment.Top
+    layout.Parent = instance
+    return layout
 end
 
-local function tween(object, info, props)
-    return TweenService:Create(object, info, props)
+local function tween(object, info, properties)
+    return TweenService:Create(object, info, properties)
 end
 
-local function clamp(v, minv, maxv)
-    return math.max(minv, math.min(maxv, v))
+local function clamp(value, minValue, maxValue)
+    return math.max(minValue, math.min(maxValue, value))
 end
 
-local function roundTo(v, step)
-    step = step or 1
-    if step <= 0 then
-        return v
+local function roundTo(value, increment)
+    increment = increment or 1
+    if increment <= 0 then
+        return value
     end
-    return math.floor((v / step) + 0.5) * step
+    return math.floor((value / increment) + 0.5) * increment
 end
 
-local function sanitize(name)
-    name = tostring(name or "default")
-    name = name:gsub("[^%w%-%._ ]", "_")
-    if name == "" then
-        name = "default"
+local function sanitize(text)
+    text = tostring(text or "default")
+    text = text:gsub("[^%w%-%._ ]", "_")
+    if text == "" then
+        text = "default"
     end
-    return name
+    return text
 end
 
 local function bindCanvas(scroller, layout, extra)
@@ -117,7 +119,7 @@ local function bindCanvas(scroller, layout, extra)
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(update)
 end
 
-local function bindFrameHeight(frame, layout, extra)
+local function bindHeight(frame, layout, extra)
     local function update()
         frame.Size = UDim2.new(frame.Size.X.Scale, frame.Size.X.Offset, 0, layout.AbsoluteContentSize.Y + (extra or 0))
     end
@@ -177,20 +179,21 @@ local function keyName(key)
     return tostring(key)
 end
 
-local function hover(button, normal, over)
+local function hover(button, normalColor, hoverColor)
     button.MouseEnter:Connect(function()
         tween(button, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            BackgroundColor3 = over
+            BackgroundColor3 = hoverColor
         }):Play()
     end)
+
     button.MouseLeave:Connect(function()
         tween(button, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            BackgroundColor3 = normal
+            BackgroundColor3 = normalColor
         }):Play()
     end)
 end
 
-local function terminalLabel(parent, text, size, color, alignX)
+local function terminalLabel(parent, text, size, color, alignment)
     local label = new("TextLabel", {
         BackgroundTransparency = 1,
         Size = UDim2.new(1, 0, 0, size + 6),
@@ -198,7 +201,7 @@ local function terminalLabel(parent, text, size, color, alignX)
         Text = text or "",
         TextColor3 = color,
         TextSize = size,
-        TextXAlignment = alignX or Enum.TextXAlignment.Left,
+        TextXAlignment = alignment or Enum.TextXAlignment.Left,
         TextYAlignment = Enum.TextYAlignment.Center,
         Parent = parent
     })
@@ -219,6 +222,7 @@ function Library:CreateWindow(options)
     self.CurrentTab = nil
     self.Visible = true
     self.Minimized = false
+    self.Maximized = false
     self.WindowSize = options.Size or UDim2.fromOffset(860, 560)
     self.StoredPosition = options.Position or UDim2.new(0.5, 0, 0.5, 0)
     self.StoredSize = self.WindowSize
@@ -229,22 +233,21 @@ function Library:CreateWindow(options)
     local gui = new("ScreenGui", {
         Name = options.GuiName or ("AppleTerminalUI_" .. HttpService:GenerateGUID(false)),
         ResetOnSpawn = false,
+        IgnoreGuiInset = true,
         ZIndexBehavior = Enum.ZIndexBehavior.Global,
-        IgnoreGuiInset = true
     })
     protectGui(gui)
     gui.Parent = parent
     self.ScreenGui = gui
 
     local shadow = new("ImageLabel", {
-        Name = "Shadow",
         BackgroundTransparency = 1,
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = self.StoredPosition,
         Size = self.WindowSize + UDim2.fromOffset(60, 60),
         Image = "rbxassetid://6014261993",
-        ImageTransparency = 0.42,
         ImageColor3 = Color3.new(0, 0, 0),
+        ImageTransparency = 0.42,
         ScaleType = Enum.ScaleType.Slice,
         SliceCenter = Rect.new(49, 49, 450, 450),
         Parent = gui
@@ -252,12 +255,12 @@ function Library:CreateWindow(options)
     self.Shadow = shadow
 
     local main = new("Frame", {
-        Name = "Main",
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = self.StoredPosition,
         Size = self.WindowSize,
         BackgroundColor3 = theme.Window,
         BorderSizePixel = 0,
+        ClipsDescendants = true,
         Parent = gui
     })
     addCorner(main, 14)
@@ -265,8 +268,7 @@ function Library:CreateWindow(options)
     self.Main = main
 
     local topBar = new("Frame", {
-        Name = "TopBar",
-        BackgroundColor3 = Color3.fromRGB(25, 27, 31),
+        BackgroundColor3 = theme.TopBar,
         BorderSizePixel = 0,
         Size = UDim2.new(1, 0, 0, 38),
         Parent = main
@@ -274,10 +276,22 @@ function Library:CreateWindow(options)
     addCorner(topBar, 14)
 
     new("Frame", {
-        BackgroundColor3 = Color3.fromRGB(25, 27, 31),
+        BackgroundColor3 = theme.TopBar,
         BorderSizePixel = 0,
         Position = UDim2.new(0, 0, 1, -16),
         Size = UDim2.new(1, 0, 0, 16),
+        Parent = topBar
+    })
+
+    local topTitle = new("TextLabel", {
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0.5, -180, 0, 0),
+        Size = UDim2.new(0, 360, 1, 0),
+        Font = Enum.Font.Code,
+        Text = self.Title .. " — zsh",
+        TextColor3 = theme.Text,
+        TextSize = 14,
+        TextXAlignment = Enum.TextXAlignment.Center,
         Parent = topBar
     })
 
@@ -291,49 +305,37 @@ function Library:CreateWindow(options)
     trafficLayout.FillDirection = Enum.FillDirection.Horizontal
     trafficLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 
-    local closeBtn = new("TextButton", {
-        Text = "",
+    local closeButton = new("TextButton", {
         AutoButtonColor = false,
+        Text = "",
         BackgroundColor3 = theme.Red,
-        Size = UDim2.fromOffset(12, 12),
         BorderSizePixel = 0,
+        Size = UDim2.fromOffset(12, 12),
         Parent = traffic
     })
-    addCorner(closeBtn, 999)
+    addCorner(closeButton, 999)
 
-    local miniBtn = new("TextButton", {
-        Text = "",
+    local minimizeButton = new("TextButton", {
         AutoButtonColor = false,
+        Text = "",
         BackgroundColor3 = theme.Yellow,
-        Size = UDim2.fromOffset(12, 12),
         BorderSizePixel = 0,
+        Size = UDim2.fromOffset(12, 12),
         Parent = traffic
     })
-    addCorner(miniBtn, 999)
+    addCorner(minimizeButton, 999)
 
-    local maxBtn = new("TextButton", {
-        Text = "",
+    local maximizeButton = new("TextButton", {
         AutoButtonColor = false,
+        Text = "",
         BackgroundColor3 = theme.Green,
-        Size = UDim2.fromOffset(12, 12),
         BorderSizePixel = 0,
+        Size = UDim2.fromOffset(12, 12),
         Parent = traffic
     })
-    addCorner(maxBtn, 999)
+    addCorner(maximizeButton, 999)
 
-    new("TextLabel", {
-        BackgroundTransparency = 1,
-        Position = UDim2.new(0.5, -180, 0, 0),
-        Size = UDim2.new(0, 360, 1, 0),
-        Font = Enum.Font.Code,
-        Text = self.Title .. " — zsh",
-        TextColor3 = theme.Text,
-        TextSize = 14,
-        TextXAlignment = Enum.TextXAlignment.Center,
-        Parent = topBar
-    })
-
-    local divider = new("Frame", {
+    new("Frame", {
         BackgroundColor3 = theme.StrokeSoft,
         BorderSizePixel = 0,
         Position = UDim2.new(0, 0, 0, 38),
@@ -342,7 +344,6 @@ function Library:CreateWindow(options)
     })
 
     local body = new("Frame", {
-        Name = "Body",
         BackgroundTransparency = 1,
         Position = UDim2.new(0, 0, 0, 39),
         Size = UDim2.new(1, 0, 1, -39),
@@ -351,7 +352,6 @@ function Library:CreateWindow(options)
     self.Body = body
 
     local sidebar = new("Frame", {
-        Name = "Sidebar",
         BackgroundColor3 = theme.Sidebar,
         BorderSizePixel = 0,
         Size = UDim2.new(0, 220, 1, 0),
@@ -359,7 +359,7 @@ function Library:CreateWindow(options)
     })
     self.Sidebar = sidebar
 
-    local sidebarDivider = new("Frame", {
+    new("Frame", {
         BackgroundColor3 = theme.StrokeSoft,
         BorderSizePixel = 0,
         Position = UDim2.new(1, -1, 0, 0),
@@ -367,57 +367,57 @@ function Library:CreateWindow(options)
         Parent = sidebar
     })
 
-    local contentWrap = new("Frame", {
-        Name = "ContentWrap",
-        BackgroundTransparency = 1,
-        Position = UDim2.new(0, 220, 0, 0),
-        Size = UDim2.new(1, -220, 1, 0),
-        Parent = body
-    })
-    self.ContentWrap = contentWrap
-
     local sidebarInner = new("Frame", {
         BackgroundTransparency = 1,
         Position = UDim2.new(0, 12, 0, 12),
         Size = UDim2.new(1, -24, 1, -24),
         Parent = sidebar
     })
-    local sidebarLayout = addList(sidebarInner, 10)
-    bindFrameHeight(sidebarInner, sidebarLayout, 0)
 
     local homeCard = new("Frame", {
         BackgroundColor3 = theme.SidebarCard,
         BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, 118),
+        Position = UDim2.new(0, 0, 0, 0),
+        Size = UDim2.new(1, 0, 0, 110),
         Parent = sidebarInner
     })
     addCorner(homeCard, 12)
     addStroke(homeCard, theme.StrokeSoft, 1, 0.2)
     addPadding(homeCard, 12, 12, 12, 12)
 
-    local homeList = addList(homeCard, 4)
+    local homeLayout = addList(homeCard, 3)
     terminalLabel(homeCard, "$ login", 13, theme.Accent, Enum.TextXAlignment.Left)
     terminalLabel(homeCard, self.Title, 18, theme.Text, Enum.TextXAlignment.Left)
     terminalLabel(homeCard, self.Subtitle, 12, theme.SubText, Enum.TextXAlignment.Left)
     terminalLabel(homeCard, "tty: /dev/console", 12, theme.Accent, Enum.TextXAlignment.Left)
 
-    local tabsLabel = terminalLabel(sidebarInner, "TABS", 11, theme.SubText, Enum.TextXAlignment.Left)
+    local tabsLabel = terminalLabel(sidebarInner, "SECTIONS", 11, theme.SubText, Enum.TextXAlignment.Left)
+    tabsLabel.Position = UDim2.new(0, 0, 0, 122)
     tabsLabel.Size = UDim2.new(1, 0, 0, 16)
 
     local tabScroll = new("ScrollingFrame", {
         Active = true,
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 1, -170),
-        ScrollBarThickness = 2,
-        ScrollBarImageColor3 = theme.Accent,
-        AutomaticCanvasSize = Enum.AutomaticSize.None,
+        Position = UDim2.new(0, 0, 0, 144),
+        Size = UDim2.new(1, 0, 1, -144),
         CanvasSize = UDim2.new(0, 0, 0, 0),
+        ScrollBarImageColor3 = theme.Accent,
+        ScrollBarThickness = 2,
+        AutomaticCanvasSize = Enum.AutomaticSize.None,
         Parent = sidebarInner
     })
-    local tabList = addList(tabScroll, 8)
-    bindCanvas(tabScroll, tabList, 12)
+    local tabLayout = addList(tabScroll, 8)
+    bindCanvas(tabScroll, tabLayout, 10)
     self.TabButtonHolder = tabScroll
+
+    local contentWrap = new("Frame", {
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 220, 0, 0),
+        Size = UDim2.new(1, -220, 1, 0),
+        Parent = body
+    })
+    self.ContentWrap = contentWrap
 
     local pageHolder = new("Frame", {
         BackgroundTransparency = 1,
@@ -429,13 +429,14 @@ function Library:CreateWindow(options)
 
     local dragging = false
     local dragStart
-    local startPos
+    local startPosition
 
     topBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
-            startPos = main.Position
+            startPosition = main.Position
+
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     dragging = false
@@ -445,14 +446,35 @@ function Library:CreateWindow(options)
     end)
 
     UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        if not dragging then
+            return
+        end
+
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
             local delta = input.Position - dragStart
-            local newPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-            main.Position = newPos
-            shadow.Position = newPos
-            self.StoredPosition = newPos
+            local newPosition = UDim2.new(
+                startPosition.X.Scale,
+                startPosition.X.Offset + delta.X,
+                startPosition.Y.Scale,
+                startPosition.Y.Offset + delta.Y
+            )
+            main.Position = newPosition
+            shadow.Position = newPosition
+            self.StoredPosition = newPosition
         end
     end)
+
+    function self:_setMainSize(newSize, newPosition)
+        tween(main, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Size = newSize,
+            Position = newPosition or main.Position
+        }):Play()
+
+        tween(shadow, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Size = newSize + UDim2.fromOffset(60, 60),
+            Position = newPosition or shadow.Position
+        }):Play()
+    end
 
     function self:SetVisible(state)
         self.Visible = state == true
@@ -469,22 +491,11 @@ function Library:CreateWindow(options)
         end
     end
 
-    function self:_setMainSize(newSize, newPosition)
-        tween(main, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = newSize,
-            Position = newPosition or main.Position
-        }):Play()
-
-        tween(shadow, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = newSize + UDim2.fromOffset(60, 60),
-            Position = newPosition or shadow.Position
-        }):Play()
-    end
-
     function self:_registerFlag(flag, getter, setter)
         if not flag or flag == "" then
             return
         end
+
         self.FlagObjects[flag] = {
             Get = getter,
             Set = setter
@@ -507,20 +518,21 @@ function Library:CreateWindow(options)
     end
 
     function self:GetConfig()
-        local out = {}
+        local output = {}
         for flag, entry in pairs(self.FlagObjects) do
             local ok, value = pcall(entry.Get)
             if ok then
-                out[flag] = value
+                output[flag] = value
             end
         end
-        return out
+        return output
     end
 
     function self:ApplyConfig(config)
         if type(config) ~= "table" then
             return
         end
+
         for flag, value in pairs(config) do
             local entry = self.FlagObjects[flag]
             if entry and entry.Set then
@@ -532,47 +544,47 @@ function Library:CreateWindow(options)
     end
 
     function self:SaveConfig(name)
-        local clean = sanitize(name or self.Title)
+        local cleanName = sanitize(name or self.Title)
         local json = HttpService:JSONEncode(self:GetConfig())
 
         if hasFileApi() then
             ensureFolder(self.ConfigFolder)
-            local path = self.ConfigFolder .. "/" .. clean .. ".json"
+            local path = self.ConfigFolder .. "/" .. cleanName .. ".json"
             writefile(path, json)
             return true, path
-        else
-            Library._memoryConfigs[clean] = json
-            return true, clean
         end
+
+        Library._memoryConfigs[cleanName] = json
+        return true, cleanName
     end
 
     function self:LoadConfig(name)
-        local clean = sanitize(name or self.Title)
+        local cleanName = sanitize(name or self.Title)
         local json
 
         if hasFileApi() then
             ensureFolder(self.ConfigFolder)
-            local path = self.ConfigFolder .. "/" .. clean .. ".json"
+            local path = self.ConfigFolder .. "/" .. cleanName .. ".json"
             if not isfile(path) then
                 return false, "Config not found: " .. path
             end
             json = readfile(path)
         else
-            json = Library._memoryConfigs[clean]
+            json = Library._memoryConfigs[cleanName]
             if not json then
                 return false, "In-memory config not found"
             end
         end
 
-        local ok, data = pcall(function()
+        local ok, decoded = pcall(function()
             return HttpService:JSONDecode(json)
         end)
         if not ok then
             return false, "Failed to decode config"
         end
 
-        self:ApplyConfig(data)
-        return true, data
+        self:ApplyConfig(decoded)
+        return true, decoded
     end
 
     function self:Notify(title, bodyText, duration)
@@ -583,17 +595,19 @@ function Library:CreateWindow(options)
             BorderSizePixel = 0,
             AnchorPoint = Vector2.new(1, 1),
             Position = UDim2.new(1, -16, 1, 120),
-            Size = UDim2.fromOffset(290, 84),
+            Size = UDim2.fromOffset(300, 86),
             Parent = gui
         })
         addCorner(note, 12)
         addStroke(note, theme.StrokeSoft, 1, 0.15)
         addPadding(note, 12, 12, 12, 12)
 
-        local noteList = addList(note, 4)
-        terminalLabel(note, "$ echo \"" .. tostring(title or "Notice") .. "\"", 12, theme.Accent, Enum.TextXAlignment.Left)
-        terminalLabel(note, tostring(bodyText or ""), 12, theme.Text, Enum.TextXAlignment.Left)
-        bindFrameHeight(note, noteList, 20)
+        local noteLayout = addList(note, 4)
+        terminalLabel(note, tostring(title or "Notice"), 13, theme.Accent, Enum.TextXAlignment.Left)
+        local bodyLabel = terminalLabel(note, tostring(bodyText or ""), 12, theme.Text, Enum.TextXAlignment.Left)
+        bodyLabel.TextWrapped = true
+        bodyLabel.AutomaticSize = Enum.AutomaticSize.Y
+        bindHeight(note, noteLayout, 20)
 
         tween(note, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
             Position = UDim2.new(1, -16, 1, -16)
@@ -601,12 +615,12 @@ function Library:CreateWindow(options)
 
         task.delay(duration, function()
             if note and note.Parent then
-                local t = tween(note, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+                local hide = tween(note, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
                     Position = UDim2.new(1, -16, 1, 120),
                     BackgroundTransparency = 1
                 })
-                t:Play()
-                t.Completed:Wait()
+                hide:Play()
+                hide.Completed:Wait()
                 if note then
                     note:Destroy()
                 end
@@ -614,11 +628,11 @@ function Library:CreateWindow(options)
         end)
     end
 
-    closeBtn.MouseButton1Click:Connect(function()
+    closeButton.MouseButton1Click:Connect(function()
         self:Destroy()
     end)
 
-    miniBtn.MouseButton1Click:Connect(function()
+    minimizeButton.MouseButton1Click:Connect(function()
         self.Minimized = not self.Minimized
         if self.Minimized then
             body.Visible = false
@@ -629,13 +643,18 @@ function Library:CreateWindow(options)
         end
     end)
 
-    maxBtn.MouseButton1Click:Connect(function()
-        if main.Size == self.WindowSize then
+    maximizeButton.MouseButton1Click:Connect(function()
+        self.Maximized = not self.Maximized
+
+        if self.Maximized then
             local camera = workspace.CurrentCamera
             local viewport = camera and camera.ViewportSize or Vector2.new(1280, 720)
-            self.StoredSize = main.Size
             self.StoredPosition = main.Position
-            self:_setMainSize(UDim2.fromOffset(math.floor(viewport.X * 0.82), math.floor(viewport.Y * 0.82)), UDim2.new(0.5, 0, 0.5, 0))
+            self.StoredSize = main.Size
+            self:_setMainSize(
+                UDim2.fromOffset(math.floor(viewport.X * 0.82), math.floor(viewport.Y * 0.82)),
+                UDim2.new(0.5, 0, 0.5, 0)
+            )
         else
             self:_setMainSize(self.WindowSize, self.StoredPosition)
         end
@@ -647,23 +666,20 @@ function Library:CreateWindow(options)
         tab.Window = self
         tab.Name = name or ("Tab " .. tostring(#self.Tabs + 1))
         tab.Icon = tabOptions.Icon or ">_"
-        tab.Description = tabOptions.Description or "session"
-        tab.Page = nil
-        tab.Button = nil
-        tab.Sections = {}
+        tab.Description = tabOptions.Description or "page"
 
         local button = new("TextButton", {
             AutoButtonColor = false,
             BackgroundColor3 = theme.SidebarCard,
             BorderSizePixel = 0,
-            Size = UDim2.new(1, 0, 0, 48),
+            Size = UDim2.new(1, 0, 0, 50),
             Text = "",
             Parent = tabScroll
         })
         addCorner(button, 10)
         addStroke(button, theme.StrokeSoft, 1, 0.2)
 
-        local icon = new("TextLabel", {
+        local iconLabel = new("TextLabel", {
             BackgroundTransparency = 1,
             Position = UDim2.new(0, 12, 0, 0),
             Size = UDim2.new(0, 36, 1, 0),
@@ -675,9 +691,9 @@ function Library:CreateWindow(options)
             Parent = button
         })
 
-        local title = new("TextLabel", {
+        local titleLabel = new("TextLabel", {
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 42, 0, 5),
+            Position = UDim2.new(0, 42, 0, 6),
             Size = UDim2.new(1, -54, 0, 18),
             Font = Enum.Font.Code,
             Text = tab.Name,
@@ -687,10 +703,10 @@ function Library:CreateWindow(options)
             Parent = button
         })
 
-        local desc = new("TextLabel", {
+        local descriptionLabel = new("TextLabel", {
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 42, 0, 22),
-            Size = UDim2.new(1, -54, 0, 16),
+            Position = UDim2.new(0, 42, 0, 24),
+            Size = UDim2.new(1, -54, 0, 14),
             Font = Enum.Font.Code,
             Text = tab.Description,
             TextColor3 = theme.SubText,
@@ -704,13 +720,13 @@ function Library:CreateWindow(options)
             BackgroundTransparency = 1,
             BorderSizePixel = 0,
             Size = UDim2.new(1, 0, 1, 0),
+            CanvasSize = UDim2.new(0, 0, 0, 0),
             ScrollBarThickness = 4,
             ScrollBarImageColor3 = theme.Accent,
-            CanvasSize = UDim2.new(0, 0, 0, 0),
             Visible = false,
             Parent = pageHolder
         })
-        local pagePadding = addPadding(page, 0, 4, 0, 0)
+        addPadding(page, 0, 4, 0, 0)
         local pageLayout = addList(page, 10)
         bindCanvas(page, pageLayout, 12)
 
@@ -720,45 +736,51 @@ function Library:CreateWindow(options)
 
         function tab:SetHero(heroOptions)
             heroOptions = heroOptions or {}
+
             if tab.Hero then
                 tab.Hero:Destroy()
             end
 
             local hero = new("Frame", {
-                Name = "Hero",
                 BackgroundColor3 = theme.Panel,
                 BorderSizePixel = 0,
-                Size = UDim2.new(1, -4, 0, 106),
+                Size = UDim2.new(1, -4, 0, 118),
                 Parent = page
             })
             addCorner(hero, 12)
             addStroke(hero, theme.StrokeSoft, 1, 0.15)
             addPadding(hero, 14, 14, 14, 14)
 
-            local heroList = addList(hero, 5)
+            local heroLayout = addList(hero, 5)
             terminalLabel(hero, heroOptions.Command or ("$ open " .. string.lower(tab.Name:gsub("%s+", "_"))), 12, theme.Accent, Enum.TextXAlignment.Left)
             terminalLabel(hero, heroOptions.Title or tab.Name, 20, theme.Text, Enum.TextXAlignment.Left)
-            terminalLabel(hero, heroOptions.Description or tab.Description, 12, theme.SubText, Enum.TextXAlignment.Left)
+
+            local desc = terminalLabel(hero, heroOptions.Description or tab.Description, 12, theme.SubText, Enum.TextXAlignment.Left)
+            desc.TextWrapped = true
+            desc.AutomaticSize = Enum.AutomaticSize.Y
 
             local metaRow = new("Frame", {
                 BackgroundTransparency = 1,
                 Size = UDim2.new(1, 0, 0, 18),
                 Parent = hero
             })
-            local leftMeta = terminalLabel(metaRow, heroOptions.MetaLeft or "user@local", 11, theme.SubText, Enum.TextXAlignment.Left)
+
+            local leftMeta = terminalLabel(metaRow, heroOptions.MetaLeft or "shell: zsh", 11, theme.SubText, Enum.TextXAlignment.Left)
             leftMeta.Size = UDim2.new(0.5, 0, 1, 0)
+
             local rightMeta = terminalLabel(metaRow, heroOptions.MetaRight or "ready", 11, theme.Accent, Enum.TextXAlignment.Right)
             rightMeta.Position = UDim2.new(0.5, 0, 0, 0)
             rightMeta.Size = UDim2.new(0.5, 0, 1, 0)
 
+            bindHeight(hero, heroLayout, 20)
             tab.Hero = hero
             return hero
         end
 
         function tab:Show()
-            for _, existing in ipairs(self.Window.Tabs) do
-                existing.Page.Visible = false
-                tween(existing.Button, TweenInfo.new(0.12), {
+            for _, existingTab in ipairs(self.Window.Tabs) do
+                existingTab.Page.Visible = false
+                tween(existingTab.Button, TweenInfo.new(0.12), {
                     BackgroundColor3 = theme.SidebarCard
                 }):Play()
             end
@@ -767,7 +789,6 @@ function Library:CreateWindow(options)
             tween(button, TweenInfo.new(0.12), {
                 BackgroundColor3 = theme.AccentMuted
             }):Play()
-
             self.Window.CurrentTab = tab
         end
 
@@ -789,20 +810,18 @@ function Library:CreateWindow(options)
             local header = new("Frame", {
                 BackgroundTransparency = 1,
                 Position = UDim2.new(0, 14, 0, 12),
-                Size = UDim2.new(1, -28, 0, 24),
+                Size = UDim2.new(1, -28, 0, 20),
                 Parent = wrap
             })
-
             terminalLabel(header, "> " .. section.Name, 13, theme.Accent, Enum.TextXAlignment.Left)
 
-            local body = new("Frame", {
+            local bodyFrame = new("Frame", {
                 BackgroundTransparency = 1,
-                Position = UDim2.new(0, 14, 0, 42),
-                Size = UDim2.new(1, -28, 0, 10),
+                Position = UDim2.new(0, 14, 0, 40),
+                Size = UDim2.new(1, -28, 0, 0),
                 Parent = wrap
             })
-            local bodyLayout = addList(body, 8)
-            bindFrameHeight(body, bodyLayout, 0)
+            local bodyLayout = addList(bodyFrame, 8)
 
             local function updateWrap()
                 wrap.Size = UDim2.new(1, -4, 0, 52 + bodyLayout.AbsoluteContentSize.Y)
@@ -811,7 +830,7 @@ function Library:CreateWindow(options)
             bodyLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateWrap)
 
             section.Frame = wrap
-            section.Body = body
+            section.Body = bodyFrame
             section.Layout = bodyLayout
 
             function section:AddLabel(text)
@@ -825,7 +844,7 @@ function Library:CreateWindow(options)
                     TextSize = 12,
                     TextWrapped = true,
                     TextXAlignment = Enum.TextXAlignment.Left,
-                    Parent = body
+                    Parent = bodyFrame
                 })
 
                 return {
@@ -837,82 +856,83 @@ function Library:CreateWindow(options)
             end
 
             function section:AddParagraph(titleText, bodyText)
-                local block = new("Frame", {
+                local holder = new("Frame", {
                     BackgroundColor3 = theme.PanelMuted,
                     BorderSizePixel = 0,
                     Size = UDim2.new(1, 0, 0, 52),
-                    AutomaticSize = Enum.AutomaticSize.Y,
-                    Parent = body
+                    Parent = bodyFrame
                 })
-                addCorner(block, 10)
-                addStroke(block, theme.StrokeSoft, 1, 0.25)
-                addPadding(block, 10, 10, 9, 9)
+                addCorner(holder, 10)
+                addStroke(holder, theme.StrokeSoft, 1, 0.25)
+                addPadding(holder, 10, 10, 9, 9)
 
-                local blockLayout = addList(block, 3)
-                terminalLabel(block, "$ " .. tostring(titleText or "info"), 12, theme.Accent, Enum.TextXAlignment.Left)
-                local textLabel = terminalLabel(block, tostring(bodyText or ""), 12, theme.SubText, Enum.TextXAlignment.Left)
+                local layout = addList(holder, 3)
+                terminalLabel(holder, tostring(titleText or "Notice"), 12, theme.Accent, Enum.TextXAlignment.Left)
+                local textLabel = terminalLabel(holder, tostring(bodyText or ""), 12, theme.SubText, Enum.TextXAlignment.Left)
                 textLabel.TextWrapped = true
                 textLabel.AutomaticSize = Enum.AutomaticSize.Y
-                bindFrameHeight(block, blockLayout, 18)
+                bindHeight(holder, layout, 18)
 
                 return {
-                    Instance = block,
+                    Instance = holder,
                     SetBody = function(_, text)
                         textLabel.Text = tostring(text)
                     end
                 }
             end
 
-            function section:AddButton(opts)
-                opts = opts or {}
-                local titleText = opts.Title or "Button"
+            function section:AddButton(options)
+                options = options or {}
 
-                local btn = new("TextButton", {
+                local holder = new("TextButton", {
                     AutoButtonColor = false,
                     BackgroundColor3 = theme.PanelMuted,
                     BorderSizePixel = 0,
-                    Size = UDim2.new(1, 0, 0, 38),
+                    Size = UDim2.new(1, 0, 0, 40),
                     Text = "",
-                    Parent = body
+                    Parent = bodyFrame
                 })
-                addCorner(btn, 10)
-                addStroke(btn, theme.StrokeSoft, 1, 0.25)
+                addCorner(holder, 10)
+                addStroke(holder, theme.StrokeSoft, 1, 0.25)
+                hover(holder, theme.PanelMuted, Color3.fromRGB(30, 34, 39))
 
-                terminalLabel(btn, "$ " .. titleText, 12, theme.Text, Enum.TextXAlignment.Left).Position = UDim2.new(0, 12, 0, 0)
-                hover(btn, theme.PanelMuted, Color3.fromRGB(30, 34, 39))
+                local title = terminalLabel(holder, tostring(options.Title or "Button"), 12, theme.Text, Enum.TextXAlignment.Left)
+                title.Position = UDim2.new(0, 12, 0, 3)
+                title.Size = UDim2.new(1, -24, 1, -6)
 
-                btn.MouseButton1Click:Connect(function()
-                    if typeof(opts.Callback) == "function" then
-                        opts.Callback()
+                holder.MouseButton1Click:Connect(function()
+                    if typeof(options.Callback) == "function" then
+                        options.Callback()
                     end
                 end)
 
                 return {
-                    Instance = btn,
+                    Instance = holder,
                     Fire = function()
-                        if typeof(opts.Callback) == "function" then
-                            opts.Callback()
+                        if typeof(options.Callback) == "function" then
+                            options.Callback()
                         end
                     end
                 }
             end
 
-            function section:AddToggle(opts)
-                opts = opts or {}
-                local titleText = opts.Title or "Toggle"
-                local flag = opts.Flag or titleText
-                local state = opts.Default == true
+            function section:AddToggle(options)
+                options = options or {}
+                local flag = options.Flag or options.Title or "Toggle"
+                local state = options.Default == true
 
                 local holder = new("Frame", {
                     BackgroundColor3 = theme.PanelMuted,
                     BorderSizePixel = 0,
                     Size = UDim2.new(1, 0, 0, 42),
-                    Parent = body
+                    Parent = bodyFrame
                 })
                 addCorner(holder, 10)
                 addStroke(holder, theme.StrokeSoft, 1, 0.25)
 
-                terminalLabel(holder, "$ " .. titleText, 12, theme.Text, Enum.TextXAlignment.Left).Position = UDim2.new(0, 12, 0, 0)
+                local title = terminalLabel(holder, tostring(options.Title or "Toggle"), 12, theme.Text, Enum.TextXAlignment.Left)
+                title.Position = UDim2.new(0, 12, 0, 0)
+                title.Size = UDim2.new(1, -86, 1, 0)
 
                 local switch = new("TextButton", {
                     AutoButtonColor = false,
@@ -928,8 +948,8 @@ function Library:CreateWindow(options)
                 local knob = new("Frame", {
                     BackgroundColor3 = Color3.fromRGB(248, 248, 248),
                     BorderSizePixel = 0,
-                    Size = UDim2.fromOffset(16, 16),
                     Position = UDim2.new(0, 2, 0.5, -8),
+                    Size = UDim2.fromOffset(16, 16),
                     Parent = switch
                 })
                 addCorner(knob, 999)
@@ -947,11 +967,11 @@ function Library:CreateWindow(options)
                     end
 
                     if not silent then
-                        if typeof(opts.Callback) == "function" then
-                            opts.Callback(state)
+                        if typeof(options.Callback) == "function" then
+                            options.Callback(state)
                         end
-                        if typeof(opts.Changed) == "function" then
-                            opts.Changed(state)
+                        if typeof(options.Changed) == "function" then
+                            options.Changed(state)
                         end
                     end
                 end
@@ -976,31 +996,32 @@ function Library:CreateWindow(options)
                 }
             end
 
-            function section:AddTextbox(opts)
-                opts = opts or {}
-                local titleText = opts.Title or "Textbox"
-                local flag = opts.Flag or titleText
-                local value = tostring(opts.Default or "")
+            function section:AddTextbox(options)
+                options = options or {}
+                local flag = options.Flag or options.Title or "Textbox"
+                local value = tostring(options.Default or "")
 
                 local holder = new("Frame", {
                     BackgroundColor3 = theme.PanelMuted,
                     BorderSizePixel = 0,
                     Size = UDim2.new(1, 0, 0, 68),
-                    Parent = body
+                    Parent = bodyFrame
                 })
                 addCorner(holder, 10)
                 addStroke(holder, theme.StrokeSoft, 1, 0.25)
 
-                terminalLabel(holder, "$ " .. titleText, 12, theme.Text, Enum.TextXAlignment.Left).Position = UDim2.new(0, 12, 0, 2)
+                local title = terminalLabel(holder, tostring(options.Title or "Textbox"), 12, theme.Text, Enum.TextXAlignment.Left)
+                title.Position = UDim2.new(0, 12, 0, 2)
+                title.Size = UDim2.new(1, -24, 0, 18)
 
                 local box = new("TextBox", {
-                    BackgroundColor3 = theme.Window,
+                    BackgroundColor3 = theme.Input,
                     BorderSizePixel = 0,
                     ClearTextOnFocus = false,
                     Position = UDim2.new(0, 12, 0, 32),
                     Size = UDim2.new(1, -24, 0, 26),
                     Font = Enum.Font.Code,
-                    PlaceholderText = opts.Placeholder or "type here...",
+                    PlaceholderText = options.Placeholder or "Type here...",
                     PlaceholderColor3 = theme.SubText,
                     Text = value,
                     TextColor3 = theme.Text,
@@ -1018,11 +1039,11 @@ function Library:CreateWindow(options)
                     self.Window.Flags[flag] = value
 
                     if not silent then
-                        if typeof(opts.Callback) == "function" then
-                            opts.Callback(value)
+                        if typeof(options.Callback) == "function" then
+                            options.Callback(value)
                         end
-                        if typeof(opts.Changed) == "function" then
-                            opts.Changed(value)
+                        if typeof(options.Changed) == "function" then
+                            options.Changed(value)
                         end
                     end
                 end
@@ -1040,36 +1061,37 @@ function Library:CreateWindow(options)
                 }
             end
 
-            function section:AddSlider(opts)
-                opts = opts or {}
-                local titleText = opts.Title or "Slider"
-                local flag = opts.Flag or titleText
-                local minv = tonumber(opts.Min) or 0
-                local maxv = tonumber(opts.Max) or 100
-                local step = tonumber(opts.Increment) or 1
-                local value = tonumber(opts.Default) or minv
-                value = clamp(roundTo(value, step), minv, maxv)
+            function section:AddSlider(options)
+                options = options or {}
+                local flag = options.Flag or options.Title or "Slider"
+                local minValue = tonumber(options.Min) or 0
+                local maxValue = tonumber(options.Max) or 100
+                local increment = tonumber(options.Increment) or 1
+                local value = tonumber(options.Default) or minValue
+                value = clamp(roundTo(value, increment), minValue, maxValue)
 
                 local holder = new("Frame", {
                     BackgroundColor3 = theme.PanelMuted,
                     BorderSizePixel = 0,
                     Size = UDim2.new(1, 0, 0, 68),
-                    Parent = body
+                    Parent = bodyFrame
                 })
                 addCorner(holder, 10)
                 addStroke(holder, theme.StrokeSoft, 1, 0.25)
 
-                terminalLabel(holder, "$ " .. titleText, 12, theme.Text, Enum.TextXAlignment.Left).Position = UDim2.new(0, 12, 0, 2)
+                local title = terminalLabel(holder, tostring(options.Title or "Slider"), 12, theme.Text, Enum.TextXAlignment.Left)
+                title.Position = UDim2.new(0, 12, 0, 2)
+                title.Size = UDim2.new(1, -120, 0, 18)
 
                 local valueLabel = terminalLabel(holder, "", 12, theme.Accent, Enum.TextXAlignment.Right)
                 valueLabel.Position = UDim2.new(0, 0, 0, 2)
                 valueLabel.Size = UDim2.new(1, -12, 0, 18)
 
                 local bar = new("Frame", {
-                    BackgroundColor3 = theme.Window,
+                    BackgroundColor3 = theme.Input,
                     BorderSizePixel = 0,
-                    Position = UDim2.new(0, 12, 0, 38),
-                    Size = UDim2.new(1, -24, 0, 10),
+                    Position = UDim2.new(0, 12, 0, 40),
+                    Size = UDim2.new(1, -24, 0, 8),
                     Parent = holder
                 })
                 addCorner(bar, 999)
@@ -1096,43 +1118,44 @@ function Library:CreateWindow(options)
                 local draggingSlider = false
 
                 local function redraw()
-                    local alpha = (value - minv) / (maxv - minv)
+                    local denominator = maxValue - minValue
+                    local alpha = denominator == 0 and 0 or ((value - minValue) / denominator)
                     alpha = clamp(alpha, 0, 1)
                     fill.Size = UDim2.new(alpha, 0, 1, 0)
                     knob.Position = UDim2.new(alpha, 0, 0.5, 0)
-                    valueLabel.Text = tostring(value) .. tostring(opts.Suffix or "")
+                    valueLabel.Text = tostring(value) .. tostring(options.Suffix or "")
                 end
 
                 local function setValue(newValue, silent)
-                    value = clamp(roundTo(tonumber(newValue) or minv, step), minv, maxv)
+                    value = clamp(roundTo(tonumber(newValue) or minValue, increment), minValue, maxValue)
                     self.Window.Flags[flag] = value
                     redraw()
 
                     if not silent then
-                        if typeof(opts.Callback) == "function" then
-                            opts.Callback(value)
+                        if typeof(options.Callback) == "function" then
+                            options.Callback(value)
                         end
-                        if typeof(opts.Changed) == "function" then
-                            opts.Changed(value)
+                        if typeof(options.Changed) == "function" then
+                            options.Changed(value)
                         end
                     end
                 end
 
-                local function fromMouse(x)
-                    local alpha = clamp((x - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1)
-                    setValue(minv + ((maxv - minv) * alpha), false)
+                local function setFromMouse(mouseX)
+                    local alpha = clamp((mouseX - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1)
+                    setValue(minValue + ((maxValue - minValue) * alpha), false)
                 end
 
                 bar.InputBegan:Connect(function(input)
                     if input.UserInputType == Enum.UserInputType.MouseButton1 then
                         draggingSlider = true
-                        fromMouse(input.Position.X)
+                        setFromMouse(input.Position.X)
                     end
                 end)
 
                 UserInputService.InputChanged:Connect(function(input)
                     if draggingSlider and input.UserInputType == Enum.UserInputType.MouseMovement then
-                        fromMouse(input.Position.X)
+                        setFromMouse(input.Position.X)
                     end
                 end)
 
@@ -1152,45 +1175,47 @@ function Library:CreateWindow(options)
                 }
             end
 
-            function section:AddDropdown(opts)
-                opts = opts or {}
-                local titleText = opts.Title or "Dropdown"
-                local flag = opts.Flag or titleText
-                local items = opts.Options or {}
-                local selected = opts.Default
-                local open = false
+            function section:AddDropdown(options)
+                options = options or {}
+                local flag = options.Flag or options.Title or "Dropdown"
+                local selected = options.Default
+                local items = options.Options or {}
+                local isOpen = false
 
                 local holder = new("Frame", {
                     BackgroundColor3 = theme.PanelMuted,
                     BorderSizePixel = 0,
                     Size = UDim2.new(1, 0, 0, 68),
-                    Parent = body
+                    Parent = bodyFrame
                 })
                 addCorner(holder, 10)
                 addStroke(holder, theme.StrokeSoft, 1, 0.25)
 
-                terminalLabel(holder, "$ " .. titleText, 12, theme.Text, Enum.TextXAlignment.Left).Position = UDim2.new(0, 12, 0, 2)
+                local title = terminalLabel(holder, tostring(options.Title or "Dropdown"), 12, theme.Text, Enum.TextXAlignment.Left)
+                title.Position = UDim2.new(0, 12, 0, 2)
+                title.Size = UDim2.new(1, -24, 0, 18)
 
-                local mainBtn = new("TextButton", {
+                local mainButton = new("TextButton", {
                     AutoButtonColor = false,
-                    BackgroundColor3 = theme.Window,
+                    BackgroundColor3 = theme.Input,
                     BorderSizePixel = 0,
                     Position = UDim2.new(0, 12, 0, 32),
                     Size = UDim2.new(1, -24, 0, 26),
                     Text = "",
                     Parent = holder
                 })
-                addCorner(mainBtn, 8)
-                addStroke(mainBtn, theme.StrokeSoft, 1, 0.25)
+                addCorner(mainButton, 8)
+                addStroke(mainButton, theme.StrokeSoft, 1, 0.25)
 
-                local current = terminalLabel(mainBtn, selected and tostring(selected) or "[ select option ]", 12, selected and theme.Text or theme.SubText, Enum.TextXAlignment.Left)
-                current.Position = UDim2.new(0, 10, 0, 0)
-                current.Size = UDim2.new(1, -34, 1, 0)
+                local currentLabel = terminalLabel(mainButton, selected and tostring(selected) or "Select an option", 12, selected and theme.Text or theme.SubText, Enum.TextXAlignment.Left)
+                currentLabel.Position = UDim2.new(0, 10, 0, 0)
+                currentLabel.Size = UDim2.new(1, -30, 1, 0)
 
-                local arrow = terminalLabel(mainBtn, "v", 12, theme.Accent, Enum.TextXAlignment.Right)
-                arrow.Size = UDim2.new(1, -10, 1, 0)
+                local arrowLabel = terminalLabel(mainButton, "v", 12, theme.Accent, Enum.TextXAlignment.Right)
+                arrowLabel.Position = UDim2.new(0, 0, 0, 0)
+                arrowLabel.Size = UDim2.new(1, -10, 1, 0)
 
-                local listWrap = new("Frame", {
+                local optionHolder = new("Frame", {
                     BackgroundTransparency = 1,
                     BorderSizePixel = 0,
                     Position = UDim2.new(0, 12, 0, 62),
@@ -1199,62 +1224,64 @@ function Library:CreateWindow(options)
                     Visible = false,
                     Parent = holder
                 })
-                local listLayout = addList(listWrap, 4)
-
-                local function setSelection(choice, silent)
-                    selected = choice
-                    current.Text = selected and tostring(selected) or "[ select option ]"
-                    current.TextColor3 = selected and theme.Text or theme.SubText
-                    self.Window.Flags[flag] = selected
-
-                    if not silent then
-                        if typeof(opts.Callback) == "function" then
-                            opts.Callback(selected)
-                        end
-                        if typeof(opts.Changed) == "function" then
-                            opts.Changed(selected)
-                        end
-                    end
-                end
+                local optionLayout = addList(optionHolder, 4)
 
                 local function resize()
-                    if open then
-                        holder.Size = UDim2.new(1, 0, 0, 68 + listLayout.AbsoluteContentSize.Y + 6)
+                    if isOpen then
+                        holder.Size = UDim2.new(1, 0, 0, 68 + optionLayout.AbsoluteContentSize.Y + 8)
                     else
                         holder.Size = UDim2.new(1, 0, 0, 68)
                     end
                 end
 
+                local function setSelection(choice, silent)
+                    selected = choice
+                    currentLabel.Text = selected and tostring(selected) or "Select an option"
+                    currentLabel.TextColor3 = selected and theme.Text or theme.SubText
+                    self.Window.Flags[flag] = selected
+
+                    if not silent then
+                        if typeof(options.Callback) == "function" then
+                            options.Callback(selected)
+                        end
+                        if typeof(options.Changed) == "function" then
+                            options.Changed(selected)
+                        end
+                    end
+                end
+
                 local function setOpen(state)
-                    open = state == true
-                    listWrap.Visible = open
-                    arrow.Text = open and "^" or "v"
+                    isOpen = state == true
+                    optionHolder.Visible = isOpen
+                    arrowLabel.Text = isOpen and "^" or "v"
                     resize()
                 end
 
                 local function rebuild()
-                    for _, child in ipairs(listWrap:GetChildren()) do
+                    for _, child in ipairs(optionHolder:GetChildren()) do
                         if child:IsA("TextButton") then
                             child:Destroy()
                         end
                     end
 
                     for _, item in ipairs(items) do
-                        local option = new("TextButton", {
+                        local optionButton = new("TextButton", {
                             AutoButtonColor = false,
-                            BackgroundColor3 = theme.Window,
+                            BackgroundColor3 = theme.Input,
                             BorderSizePixel = 0,
                             Size = UDim2.new(1, 0, 0, 24),
                             Text = "",
-                            Parent = listWrap
+                            Parent = optionHolder
                         })
-                        addCorner(option, 8)
-                        addStroke(option, theme.StrokeSoft, 1, 0.25)
-                        hover(option, theme.Window, Color3.fromRGB(26, 29, 34))
+                        addCorner(optionButton, 8)
+                        addStroke(optionButton, theme.StrokeSoft, 1, 0.25)
+                        hover(optionButton, theme.Input, Color3.fromRGB(26, 29, 34))
 
-                        terminalLabel(option, tostring(item), 12, theme.Text, Enum.TextXAlignment.Left).Position = UDim2.new(0, 10, 0, 0)
+                        local optionText = terminalLabel(optionButton, tostring(item), 12, theme.Text, Enum.TextXAlignment.Left)
+                        optionText.Position = UDim2.new(0, 10, 0, 0)
+                        optionText.Size = UDim2.new(1, -20, 1, 0)
 
-                        option.MouseButton1Click:Connect(function()
+                        optionButton.MouseButton1Click:Connect(function()
                             setSelection(tostring(item), false)
                             setOpen(false)
                         end)
@@ -1263,65 +1290,69 @@ function Library:CreateWindow(options)
                     resize()
                 end
 
-                listLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(resize)
+                optionLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(resize)
 
-                mainBtn.MouseButton1Click:Connect(function()
-                    setOpen(not open)
+                mainButton.MouseButton1Click:Connect(function()
+                    setOpen(not isOpen)
                 end)
 
                 rebuild()
                 if selected ~= nil then
                     setSelection(selected, true)
                 end
-
                 self.Window:_registerFlag(flag, function() return selected end, setSelection)
 
                 return {
                     Instance = holder,
-                    Set = function(_, v) setSelection(v, false) end,
-                    Get = function() return selected end,
-                    Refresh = function(_, newItems, keep)
+                    Set = function(_, value)
+                        setSelection(value, false)
+                    end,
+                    Get = function()
+                        return selected
+                    end,
+                    Refresh = function(_, newItems, keepSelection)
                         items = newItems or {}
                         rebuild()
-                        if not keep then
+                        if not keepSelection then
                             setSelection(nil, true)
                         end
                     end
                 }
             end
 
-            function section:AddKeybind(opts)
-                opts = opts or {}
-                local titleText = opts.Title or "Keybind"
-                local flag = opts.Flag or titleText
-                local currentKey = opts.Default or Enum.KeyCode.RightShift
+            function section:AddKeybind(options)
+                options = options or {}
+                local flag = options.Flag or options.Title or "Keybind"
+                local currentKey = options.Default or Enum.KeyCode.RightShift
                 local listening = false
 
                 local holder = new("Frame", {
                     BackgroundColor3 = theme.PanelMuted,
                     BorderSizePixel = 0,
                     Size = UDim2.new(1, 0, 0, 42),
-                    Parent = body
+                    Parent = bodyFrame
                 })
                 addCorner(holder, 10)
                 addStroke(holder, theme.StrokeSoft, 1, 0.25)
 
-                terminalLabel(holder, "$ " .. titleText, 12, theme.Text, Enum.TextXAlignment.Left).Position = UDim2.new(0, 12, 0, 0)
+                local title = terminalLabel(holder, tostring(options.Title or "Keybind"), 12, theme.Text, Enum.TextXAlignment.Left)
+                title.Position = UDim2.new(0, 12, 0, 0)
+                title.Size = UDim2.new(1, -120, 1, 0)
 
-                local bindBtn = new("TextButton", {
+                local bindButton = new("TextButton", {
                     AutoButtonColor = false,
-                    BackgroundColor3 = theme.Window,
+                    BackgroundColor3 = theme.Input,
                     BorderSizePixel = 0,
                     Position = UDim2.new(1, -112, 0.5, -12),
                     Size = UDim2.fromOffset(98, 24),
                     Text = "",
                     Parent = holder
                 })
-                addCorner(bindBtn, 8)
-                addStroke(bindBtn, theme.StrokeSoft, 1, 0.25)
-                hover(bindBtn, theme.Window, Color3.fromRGB(26, 29, 34))
+                addCorner(bindButton, 8)
+                addStroke(bindButton, theme.StrokeSoft, 1, 0.25)
+                hover(bindButton, theme.Input, Color3.fromRGB(26, 29, 34))
 
-                local bindText = terminalLabel(bindBtn, "[" .. keyName(currentKey) .. "]", 12, theme.Accent, Enum.TextXAlignment.Center)
+                local bindText = terminalLabel(bindButton, "[" .. keyName(currentKey) .. "]", 12, theme.Accent, Enum.TextXAlignment.Center)
                 bindText.Size = UDim2.new(1, 0, 1, 0)
 
                 local function setKey(newKey, silent)
@@ -1340,12 +1371,12 @@ function Library:CreateWindow(options)
                     bindText.Text = "[" .. keyName(currentKey) .. "]"
                     self.Window.Flags[flag] = keyName(currentKey)
 
-                    if not silent and typeof(opts.Changed) == "function" then
-                        opts.Changed(currentKey)
+                    if not silent and typeof(options.Changed) == "function" then
+                        options.Changed(currentKey)
                     end
                 end
 
-                bindBtn.MouseButton1Click:Connect(function()
+                bindButton.MouseButton1Click:Connect(function()
                     listening = true
                     bindText.Text = "[ ... ]"
                 end)
@@ -1367,8 +1398,8 @@ function Library:CreateWindow(options)
                     end
 
                     if input.KeyCode == currentKey then
-                        if typeof(opts.Callback) == "function" then
-                            opts.Callback(currentKey)
+                        if typeof(options.Callback) == "function" then
+                            options.Callback(currentKey)
                         end
                     end
                 end)
@@ -1392,13 +1423,13 @@ function Library:CreateWindow(options)
 
         table.insert(self.Tabs, tab)
 
-        if not tab.Hero then
-            tab:SetHero({
-                Title = tab.Name,
-                Description = tab.Description,
-                Command = "$ cd /" .. string.lower(tab.Name:gsub("%s+", "_"))
-            })
-        end
+        tab:SetHero({
+            Command = "$ open " .. string.lower(tab.Name:gsub("%s+", "_")),
+            Title = tab.Name,
+            Description = tab.Description,
+            MetaLeft = "shell: zsh",
+            MetaRight = "ready"
+        })
 
         if not self.CurrentTab then
             tab:Show()
