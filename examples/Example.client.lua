@@ -1,113 +1,107 @@
 local AppleTerminalUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/humiditybusinessemail-prog/terminal-hub/main/src/AppleTerminalUI.lua"))()
 
 local Window = AppleTerminalUI:CreateWindow({
-    Title = "Apple Terminal",
-    Subtitle = "example interface",
-    Size = UDim2.fromOffset(720, 520),
+    Title = "Terminal Hub",
+    Subtitle = "session",
+    Size = UDim2.fromOffset(900, 580),
     ConfigFolder = "AppleTerminalUI"
 })
 
-local MainTab = Window:CreateTab("Main")
-local ConfigTab = Window:CreateTab("Config")
+local Home = Window:CreateTab("Home", {
+    Icon = "~/",
+    Description = "dashboard"
+})
 
-local MainSection = MainTab:AddSection("General Controls")
-MainSection:AddLabel("This is an Apple Terminal styled Roblox UI library.")
-MainSection:AddParagraph("Tip", "Use flags + save/load config to persist your toggle, slider, textbox, dropdown, and keybind values.")
+Home:SetHero({
+    Command = "$ ./terminal_hub",
+    Title = "Terminal Hub",
+    Description = "dashboard",
+    MetaLeft = "shell: zsh",
+    MetaRight = "ready"
+})
 
-MainSection:AddButton({
-    Title = "Print Hello",
+local Main = Home:AddSection("Main")
+Main:AddButton({
+    Title = "Hello",
     Callback = function()
-        print("Hello from AppleTerminalUI!")
-        Window:Notify("Hello", "Button callback fired.", 2)
+        print("Terminal Hub")
+        Window:Notify("Terminal Hub", "Ready", 2)
     end
 })
-
-MainSection:AddToggle({
-    Title = "Enable Feature",
-    Flag = "feature_enabled",
+Main:AddToggle({
+    Title = "Enabled",
+    Flag = "enabled",
     Default = true,
-    Callback = function(state)
-        print("Toggle state:", state)
+    Callback = function(v)
+        print("Enabled:", v)
     end
 })
-
-MainSection:AddTextbox({
-    Title = "Player Name",
-    Flag = "player_name",
-    Default = "Guest",
-    Placeholder = "Type a name...",
-    Callback = function(text)
-        print("Textbox value:", text)
-    end
-})
-
-MainSection:AddSlider({
-    Title = "WalkSpeed",
-    Flag = "walk_speed",
-    Min = 0,
-    Max = 100,
-    Increment = 1,
-    Default = 16,
-    Suffix = " ws",
-    Callback = function(value)
-        print("Slider value:", value)
-    end
-})
-
-MainSection:AddDropdown({
-    Title = "Mode",
-    Flag = "selected_mode",
-    Default = "Legit",
-    Options = {"Legit", "Rage", "Stealth", "Custom"},
-    Callback = function(selected)
-        print("Dropdown selected:", selected)
-    end
-})
-
-MainSection:AddKeybind({
-    Title = "Toggle UI Keybind",
-    Flag = "ui_key",
+Main:AddKeybind({
+    Title = "Toggle UI",
+    Flag = "toggle_ui",
     Default = Enum.KeyCode.RightShift,
-    Changed = function(newKey)
-        print("Keybind changed to:", newKey.Name)
-    end,
     Callback = function()
         Window:ToggleVisible()
     end
 })
 
-local ConfigSection = ConfigTab:AddSection("Configuration")
-ConfigSection:AddButton({
-    Title = "Save Config",
-    Callback = function()
-        local ok, result = Window:SaveConfig("example_config")
-        if ok then
-            Window:Notify("Config Saved", tostring(result), 3)
-        else
-            Window:Notify("Config Error", tostring(result), 3)
-        end
-    end
+local Settings = Window:CreateTab("Settings", {
+    Icon = "cfg",
+    Description = "config"
 })
 
-ConfigSection:AddButton({
-    Title = "Load Config",
-    Callback = function()
-        local ok, result = Window:LoadConfig("example_config")
-        if ok then
-            Window:Notify("Config Loaded", "Values restored.", 3)
-        else
-            Window:Notify("Config Error", tostring(result), 3)
-        end
-    end
+Settings:SetHero({
+    Command = "$ open settings",
+    Title = "Settings",
+    Description = "config",
+    MetaLeft = "profile: default",
+    MetaRight = "client"
 })
 
-ConfigSection:AddButton({
-    Title = "Show Current Flags",
+local Config = Settings:AddSection("Config")
+Config:AddTextbox({
+    Title = "Profile",
+    Flag = "profile_name",
+    Default = "default",
+    Placeholder = "profile"
+})
+Config:AddSlider({
+    Title = "WalkSpeed",
+    Flag = "walkspeed",
+    Min = 0,
+    Max = 100,
+    Increment = 1,
+    Default = 16,
+    Suffix = " ws"
+})
+Config:AddDropdown({
+    Title = "Mode",
+    Flag = "mode",
+    Default = "Legit",
+    Options = {"Legit", "Stealth", "Debug", "Custom"}
+})
+
+local IO = Settings:AddSection("IO")
+IO:AddButton({
+    Title = "Save",
     Callback = function()
-        local config = Window:GetConfig()
-        for flag, value in pairs(config) do
-            print(flag, value)
+        local ok, result = Window:SaveConfig("terminal_hub_example")
+        Window:Notify(ok and "Saved" or "Error", ok and "Done" or tostring(result), 3)
+    end
+})
+IO:AddButton({
+    Title = "Load",
+    Callback = function()
+        local ok, result = Window:LoadConfig("terminal_hub_example")
+        Window:Notify(ok and "Loaded" or "Error", ok and "Done" or tostring(result), 3)
+    end
+})
+IO:AddButton({
+    Title = "Print",
+    Callback = function()
+        local cfg = Window:GetConfig()
+        for k, v in pairs(cfg) do
+            print(k, v)
         end
-        Window:Notify("Flags Printed", "Check console output.", 2)
     end
 })

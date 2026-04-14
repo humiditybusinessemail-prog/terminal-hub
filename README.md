@@ -1,452 +1,140 @@
-# AppleTerminalUI
+# AppleTerminalUI Revised
 
-AppleTerminalUI is a Roblox client-side UI library styled after the macOS Apple Terminal application. It is designed to be simple to call from an executor, easy to extend, and ready to upload to GitHub.
+This version revises the main source so the library keeps a much stronger Apple Terminal identity while improving the internal page structure.
 
-## Features
+## What changed
 
-- macOS Terminal-inspired interface
-- Draggable window
-- Close / minimize / maximize traffic-light controls
-- Tabs
-- Sections
-- Buttons
-- Labels
-- Paragraphs
-- Toggles
-- Textboxes
-- Sliders
-- Dropdowns
-- Keybinds
-- Notifications
-- Config save / load system
-- Executor file API support (`writefile`, `readfile`, `isfile`, `makefolder`, `isfolder`)
-- In-memory config fallback when file APIs are not available
+- stronger macOS Terminal look
+- dedicated sidebar home card
+- clear tabs section in the sidebar
+- per-page hero/header block
+- cleaner page routing with independent scrolling pages
+- improved section containers and control layout
+- same reusable client-side executor workflow
+- config save/load, notifications, keybinds, sliders, dropdowns, textboxes, and toggles
 
----
+## Main design intent
 
-## Repository layout
+This revision **does not copy** the uploaded example. It only borrows the idea of:
+- a separated sidebar tab area
+- a dedicated header/content region
+- page-per-tab organization
+- scroll-based content pages
 
-```text
-apple-terminal-ui-lib/
-├─ src/
-│  └─ AppleTerminalUI.lua
-├─ examples/
-│  └─ Example.client.lua
-├─ README.md
-├─ LICENSE
-└─ .gitignore
-```
+The visual identity, component design, API shape, and terminal styling are rebuilt around the Apple Terminal concept.
 
----
+## Files
 
-## How to call the library
+- `src/AppleTerminalUI.lua`
+- `examples/Example.client.lua`
 
-### Option 1: loadstring from raw GitHub
+## Load the library
 
 ```lua
 local AppleTerminalUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/humiditybusinessemail-prog/terminal-hub/main/src/AppleTerminalUI.lua"))()
 ```
 
-### Option 2: local file
+## Basic usage
 
 ```lua
-local AppleTerminalUI = loadfile("AppleTerminalUI.lua")()
-```
-
-### Option 3: require as a module
-
-If you convert it into a ModuleScript in Roblox Studio:
-
-```lua
-local AppleTerminalUI = require(path.to.AppleTerminalUI)
-```
-
----
-
-## Creating a window
-
-```lua
-local AppleTerminalUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/humiditybusinessemail-prog/terminal-hub/main/src/AppleTerminalUI.lua"))()
-
 local Window = AppleTerminalUI:CreateWindow({
-    Title = "Apple Terminal",
-    Subtitle = "example interface",
-    Size = UDim2.fromOffset(720, 520),
+    Title = "Terminal Hub",
+    Subtitle = "apple terminal identity",
+    Size = UDim2.fromOffset(900, 580),
     ConfigFolder = "AppleTerminalUI"
 })
-```
 
-### Window options
+local Tab = Window:CreateTab("Home", {
+    Icon = "~/",
+    Description = "overview page"
+})
 
-| Key | Type | Description |
-|---|---|---|
-| `Title` | string | Main window title |
-| `Subtitle` | string | Small subtitle text under the title |
-| `Size` | UDim2 | Window size |
-| `ConfigFolder` | string | Folder used for saved config JSON files |
-| `GuiName` | string | Optional ScreenGui name |
+Tab:SetHero({
+    Command = "$ ./terminal_hub",
+    Title = "Terminal Hub",
+    Description = "Page hero/header block"
+})
 
----
+local Section = Tab:AddSection("Quick Start")
 
-## Creating tabs
-
-```lua
-local MainTab = Window:CreateTab("Main")
-local ConfigTab = Window:CreateTab("Config")
-```
-
----
-
-## Creating sections
-
-```lua
-local MainSection = MainTab:AddSection("General Controls")
-```
-
-Sections are containers that hold controls.
-
----
-
-## Adding a label
-
-```lua
-MainSection:AddLabel("This is a simple label.")
-```
-
----
-
-## Adding a paragraph
-
-```lua
-MainSection:AddParagraph("Info", "This is a multi-line paragraph block.")
-```
-
----
-
-## Adding a button
-
-```lua
-MainSection:AddButton({
-    Title = "Print Hello",
+Section:AddButton({
+    Title = "Run Command",
     Callback = function()
-        print("Hello!")
+        print("clicked")
     end
 })
-```
 
-### Button fields
-
-| Key | Type | Description |
-|---|---|---|
-| `Title` | string | Button text |
-| `Callback` | function | Runs when the button is clicked |
-
----
-
-## Adding a toggle
-
-```lua
-MainSection:AddToggle({
+Section:AddToggle({
     Title = "Enable Feature",
-    Flag = "feature_enabled",
+    Flag = "enabled",
     Default = true,
     Callback = function(state)
-        print("Toggle state:", state)
+        print(state)
     end
 })
-```
 
-### Toggle fields
-
-| Key | Type | Description |
-|---|---|---|
-| `Title` | string | Control label |
-| `Flag` | string | Config key |
-| `Default` | boolean | Starting value |
-| `Callback` | function | Runs on change |
-| `Changed` | function | Optional secondary change callback |
-
-### Toggle methods
-
-```lua
-local Toggle = MainSection:AddToggle({...})
-Toggle:Set(false)
-print(Toggle:Get())
-```
-
----
-
-## Adding a textbox
-
-```lua
-MainSection:AddTextbox({
-    Title = "Player Name",
-    Flag = "player_name",
-    Default = "Guest",
-    Placeholder = "Type a name...",
-    Callback = function(text)
-        print(text)
-    end
+Section:AddTextbox({
+    Title = "Username",
+    Flag = "username",
+    Default = "guest"
 })
-```
 
-### Textbox fields
-
-| Key | Type | Description |
-|---|---|---|
-| `Title` | string | Control label |
-| `Flag` | string | Config key |
-| `Default` | string | Starting text |
-| `Placeholder` | string | Placeholder text |
-| `Callback` | function | Runs when focus is lost |
-| `Changed` | function | Optional secondary change callback |
-
-### Textbox methods
-
-```lua
-local Box = MainSection:AddTextbox({...})
-Box:Set("NewName")
-print(Box:Get())
-```
-
----
-
-## Adding a slider
-
-```lua
-MainSection:AddSlider({
+Section:AddSlider({
     Title = "WalkSpeed",
-    Flag = "walk_speed",
+    Flag = "walkspeed",
     Min = 0,
     Max = 100,
     Increment = 1,
-    Default = 16,
-    Suffix = " ws",
-    Callback = function(value)
-        print(value)
-    end
+    Default = 16
 })
-```
 
-### Slider fields
-
-| Key | Type | Description |
-|---|---|---|
-| `Title` | string | Control label |
-| `Flag` | string | Config key |
-| `Min` | number | Minimum value |
-| `Max` | number | Maximum value |
-| `Increment` | number | Snap step |
-| `Default` | number | Starting value |
-| `Suffix` | string | Optional value suffix |
-| `Callback` | function | Runs on change |
-| `Changed` | function | Optional secondary change callback |
-
-### Slider methods
-
-```lua
-local Slider = MainSection:AddSlider({...})
-Slider:Set(42)
-print(Slider:Get())
-```
-
----
-
-## Adding a dropdown
-
-```lua
-MainSection:AddDropdown({
+Section:AddDropdown({
     Title = "Mode",
-    Flag = "selected_mode",
-    Default = "Legit",
-    Options = {"Legit", "Rage", "Stealth", "Custom"},
-    Callback = function(selected)
-        print(selected)
-    end
+    Flag = "mode",
+    Options = {"Legit", "Stealth", "Debug"}
 })
-```
 
-### Dropdown fields
-
-| Key | Type | Description |
-|---|---|---|
-| `Title` | string | Control label |
-| `Flag` | string | Config key |
-| `Default` | string | Starting selected value |
-| `Options` | table | Array of entries |
-| `Callback` | function | Runs on selection |
-| `Changed` | function | Optional secondary change callback |
-
-### Dropdown methods
-
-```lua
-local Dropdown = MainSection:AddDropdown({...})
-Dropdown:Set("Custom")
-print(Dropdown:Get())
-Dropdown:Refresh({"A", "B", "C"}, false)
-Dropdown:Open()
-Dropdown:Close()
-```
-
----
-
-## Adding a keybind
-
-```lua
-MainSection:AddKeybind({
-    Title = "Toggle UI Keybind",
-    Flag = "ui_key",
+Section:AddKeybind({
+    Title = "Toggle UI",
+    Flag = "toggle_ui",
     Default = Enum.KeyCode.RightShift,
-    Changed = function(newKey)
-        print("New key:", newKey.Name)
-    end,
     Callback = function()
         Window:ToggleVisible()
     end
 })
 ```
 
-### Keybind fields
-
-| Key | Type | Description |
-|---|---|---|
-| `Title` | string | Control label |
-| `Flag` | string | Config key |
-| `Default` | Enum.KeyCode | Starting bind |
-| `Callback` | function | Runs when the bound key is pressed |
-| `Changed` | function | Runs when the keybind is changed |
-
-### Keybind methods
-
-```lua
-local Keybind = MainSection:AddKeybind({...})
-Keybind:Set(Enum.KeyCode.LeftAlt)
-print(Keybind:Get())
-```
-
----
-
-## Notifications
-
-```lua
-Window:Notify("Saved", "Config saved successfully.", 3)
-```
-
-### Parameters
-
-| Parameter | Type | Description |
-|---|---|---|
-| `titleText` | string | Notification title |
-| `bodyText` | string | Notification body |
-| `duration` | number | Seconds before closing |
-
----
-
-## Working with flags
-
-Any control with a `Flag` is automatically registered in the config system.
-
-### Get one flag
-
-```lua
-print(Window:GetFlag("walk_speed"))
-```
-
-### Set one flag
-
-```lua
-Window:SetFlag("walk_speed", 32)
-```
-
-### Get full config table
-
-```lua
-local config = Window:GetConfig()
-for flag, value in pairs(config) do
-    print(flag, value)
-end
-```
-
----
-
-## Saving and loading config
-
-### Save config
-
-```lua
-local ok, result = Window:SaveConfig("my_config")
-print(ok, result)
-```
-
-### Load config
-
-```lua
-local ok, result = Window:LoadConfig("my_config")
-print(ok, result)
-```
-
-### Notes
-
-- If the executor supports file APIs, configs save to:
-  - `AppleTerminalUI/my_config.json`
-- If file APIs are unavailable, configs are stored only in memory for that session.
-
----
-
-## Window methods
+## Window API
 
 ```lua
 Window:SetVisible(true)
 Window:ToggleVisible()
 Window:Destroy()
+Window:GetFlag("enabled")
+Window:SetFlag("enabled", false)
+Window:GetConfig()
+Window:SaveConfig("my_config")
+Window:LoadConfig("my_config")
+Window:Notify("Saved", "Config saved.", 3)
 ```
 
----
+## Tab API
 
-## Full example
+```lua
+local Tab = Window:CreateTab("Combat", {
+    Icon = ">_",
+    Description = "combat related features"
+})
 
-A full working example is included in:
-
-```text
-examples/Example.client.lua
+Tab:SetHero({
+    Command = "$ open combat",
+    Title = "Combat",
+    Description = "Hero card text"
+})
 ```
 
----
+## Notes
 
-## Styling notes
-
-The library uses:
-- `Enum.Font.Code` for terminal-like typography
-- dark layered backgrounds
-- green accent text and controls
-- macOS traffic-light window buttons
-
-You can customize the theme in `src/AppleTerminalUI.lua` by editing `Library.Theme`.
-
----
-
-## Uploading to GitHub
-
-1. Upload the repository files.
-2. Make the repo public if you want to use `game:HttpGet(...)`.
-3. Use the raw GitHub link from the `src/AppleTerminalUI.lua` file.
-
-Example raw URL pattern:
-
-```text
-https://raw.githubusercontent.com/humiditybusinessemail-prog/terminal-hub/main/src/AppleTerminalUI.lua
-```
-
----
-
-## License
-
-This project is licensed under the Apache License 2.0. See the `LICENSE` file for full text.
-
----
-
-## GitHub source link
-
-```text
-https://github.com/humiditybusinessemail-prog/terminal-hub/blob/main/src/AppleTerminalUI.lua
-```
+- `game:HttpGet(...)` should use the raw GitHub URL, not the `/blob/` page URL.
+- Config files are saved with executor file APIs when available.
+- If file APIs do not exist, configs fall back to in-memory session storage.
