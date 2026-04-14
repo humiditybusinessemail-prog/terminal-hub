@@ -1,4 +1,4 @@
-local AppleTerminalUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/yourname/apple-terminal-ui/main/src/AppleTerminalUI.lua"))()
+local AppleTerminalUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/humiditybusinessemail-prog/terminal-hub/main/src/AppleTerminalUI.lua"))()
 
 local Window = AppleTerminalUI:CreateWindow({
     Title = "Apple Terminal",

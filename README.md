@@ -44,7 +44,7 @@ apple-terminal-ui-lib/
 ### Option 1: loadstring from raw GitHub
 
 ```lua
-local AppleTerminalUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/yourname/apple-terminal-ui/main/src/AppleTerminalUI.lua"))()
+local AppleTerminalUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/humiditybusinessemail-prog/terminal-hub/main/src/AppleTerminalUI.lua"))()
 ```
 
 ### Option 2: local file
@@ -66,7 +66,7 @@ local AppleTerminalUI = require(path.to.AppleTerminalUI)
 ## Creating a window
 
 ```lua
-local AppleTerminalUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/yourname/apple-terminal-ui/main/src/AppleTerminalUI.lua"))()
+local AppleTerminalUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/humiditybusinessemail-prog/terminal-hub/main/src/AppleTerminalUI.lua"))()
 
 local Window = AppleTerminalUI:CreateWindow({
     Title = "Apple Terminal",
@@ -434,7 +434,7 @@ You can customize the theme in `src/AppleTerminalUI.lua` by editing `Library.The
 Example raw URL pattern:
 
 ```text
-https://raw.githubusercontent.com/<username>/<repository>/main/src/AppleTerminalUI.lua
+https://raw.githubusercontent.com/humiditybusinessemail-prog/terminal-hub/main/src/AppleTerminalUI.lua
 ```
 
 ---
@@ -442,3 +442,11 @@ https://raw.githubusercontent.com/<username>/<repository>/main/src/AppleTerminal
 ## License
 
 This project is licensed under the Apache License 2.0. See the `LICENSE` file for full text.
+
+---
+
+## GitHub source link
+
+```text
+https://github.com/humiditybusinessemail-prog/terminal-hub/blob/main/src/AppleTerminalUI.lua
+```
