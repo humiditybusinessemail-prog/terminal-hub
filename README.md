@@ -13,14 +13,6 @@ This version revises the main source so the library keeps a much stronger Apple 
 - same reusable client-side executor workflow
 - config save/load, notifications, keybinds, sliders, dropdowns, textboxes, and toggles
 
-## Main design intent
-
-This revision **does not copy** the uploaded example. It only borrows the idea of:
-- a separated sidebar tab area
-- a dedicated header/content region
-- page-per-tab organization
-- scroll-based content pages
-
 The visual identity, component design, API shape, and terminal styling are rebuilt around the Apple Terminal concept.
 
 ## Files
