@@ -1,18 +1,3 @@
--- Global Execution Bridge
-local function ExecutePayload(source)
-    if not source or source == "" then return end
-    
-    local func, compileError = loadstring(source)
-    
-    if func then
-        local success, runtimeError = pcall(func)
-        if not success then
-            warn("Terminal Hub Runtime Error: " .. tostring(runtimeError))
-        end
-    else
-        warn("Terminal Hub Syntax Error: " .. tostring(compileError))
-    end
-end
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -47,6 +32,21 @@ Library.Theme = {
     Yellow = Color3.fromRGB(255, 189, 46),
     Green = Color3.fromRGB(39, 201, 63),
 }
+
+local function ExecutePayload(source)
+    if not source or source == "" then return end
+    
+    local func, compileError = loadstring(source)
+    
+    if func then
+        local success, runtimeError = pcall(func)
+        if not success then
+            warn("Terminal Hub Runtime Error: " .. tostring(runtimeError))
+        end
+    else
+        warn("Terminal Hub Syntax Error: " .. tostring(compileError))
+    end
+end
 
 local Window = {}
 Window.__index = Window
