@@ -1,5 +1,5 @@
 
-Check our website: terminalhub.netlify.app
+Check our website: https://terminalhub.netlify.app
 
 # AppleTerminalUI
 
